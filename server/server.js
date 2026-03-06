@@ -14,7 +14,10 @@ const app = express();
 await connectDB();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+     origin: "https://car-rental-frontend-eta-three.vercel.app",
+     credentials: true
+}));
 app.use(express.json());
 
 // Routes

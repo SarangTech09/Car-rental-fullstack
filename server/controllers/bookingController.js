@@ -70,7 +70,7 @@ export const createBooking = async (req, res) => {
     });
 
     // Email to User
-    await sendEmail(
+     sendEmail(
       userData.email,
       "Booking Request Received 🚗",
       `
@@ -83,7 +83,7 @@ export const createBooking = async (req, res) => {
     );
 
     // Email to Owner
-    await sendEmail(
+     sendEmail(
       carData.owner.email,
       "New Booking Request 🚨",
       `
@@ -172,7 +172,7 @@ export const updateBookingStatus = async (req, res) => {
 
     // Send confirmation email ONLY if confirmed
     if (status === "confirmed") {
-      await sendEmail(
+        sendEmail(
         booking.user.email,
         "Booking Confirmed ✅",
         `

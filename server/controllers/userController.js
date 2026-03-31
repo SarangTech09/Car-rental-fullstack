@@ -2,7 +2,9 @@ import User from "../models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import Car from "../models/Car.js";
+import { OAuth2Client } from "google-auth-library";
 
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Generate JWT Token
 const generateToken = (user) => {
@@ -66,6 +68,49 @@ export const loginUser = async (req, res) => {
         res.json({success: false, message: error.message});
     }
 }
+
+// Google OAuth Login
+export const googleLogin = async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    // Verify token from Google
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    const { email, name, picture } = payload;
+
+    // Check if user already exists
+    let user = await User.findOne({ email });
+
+    // If not, create new user
+    if (!user) {
+      user = await User.create({
+        name,
+        email,
+        password: "google-auth", // dummy password
+        image: picture, // optional (only if schema supports it)
+      });
+    }
+
+    // Generate JWT
+    const jwtToken = generateToken(user);
+
+    res.json({
+      success: true,
+      token: jwtToken,
+      role: user.role,
+    });
+
+  } catch (error) {
+    console.log("Google Login Error:", error.message);
+    res.json({ success: false, message: "Google login failed" });
+  }
+};
 
 // Get User Profile using Token (JWT)
 

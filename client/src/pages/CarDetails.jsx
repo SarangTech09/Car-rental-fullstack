@@ -30,7 +30,7 @@ const CarDetails = () => {
       }
       
     } catch (error) {
-      toast.error("Failed to create booking");
+      toast.error("Unauthorized, Login first");
     }
   }
 

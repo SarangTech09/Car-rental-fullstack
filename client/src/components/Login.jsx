@@ -3,6 +3,7 @@ import { useAppContext } from "../context/AppContext";
 import toast from "react-hot-toast";
 import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
+import { GoogleLogin } from "@react-oauth/google";
 
 const Login = () => {
   const { setShowLogin, axios, setToken, navigate } = useAppContext();
@@ -18,7 +19,9 @@ const Login = () => {
   const onSubmitHandler = async (event) => {
     try {
       event.preventDefault();
-      const endpoint = isOwnerLogin ? `/api/owner/${state}` : `/api/user/${state}`;
+      const endpoint = isOwnerLogin
+        ? `/api/owner/${state}`
+        : `/api/user/${state}`;
 
       const { data } = await axios.post(endpoint, { name, email, password });
 
@@ -47,21 +50,22 @@ const Login = () => {
     <div
       onClick={() => {
         setShowLogin(false);
-        navigate('/');
+        navigate("/");
       }}
       className="fixed top-0 bottom-0 left-0 right-0 z-100 flex items-center text-sm text-gray-600 bg-black/50"
     >
       <motion.form
-      initial={{ scale: 0.9, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 0.25 }}
-
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.25 }}
         onSubmit={onSubmitHandler}
         onClick={(e) => e.stopPropagation()}
         className="flex flex-col gap-4 m-auto items-start p-8 py-12 w-80 sm:w-[352px] text-gray-500 rounded-lg shadow-xl border border-gray-200 bg-white"
       >
         <p className="text-2xl font-medium m-auto">
-          <span className="text-primary">{isOwnerLogin ? "Owner" : "User"}</span>{" "}
+          <span className="text-primary">
+            {isOwnerLogin ? "Owner" : "User"}
+          </span>{" "}
           {state === "login" ? "Login" : "Sign Up"}
         </p>
         {state === "register" && (
@@ -123,6 +127,38 @@ const Login = () => {
         <button className="bg-primary hover:bg-blue-500 transition-all text-white w-full py-2 rounded-md cursor-pointer">
           {state === "register" ? "Create Account" : "Login"}
         </button>
+
+        {/* Divider */}
+        <div className="w-full text-center text-gray-400">or</div>
+
+        {/* Google Login */}
+        <div className="w-full flex justify-center">
+        <GoogleLogin
+          onSuccess={async (credentialResponse) => {
+            try {
+              const { data } = await axios.post("/api/user/google-login", {
+                token: credentialResponse.credential,
+              });
+
+              if (data.success) {
+                setToken(data.token);
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("role", data.role);
+
+                navigate("/");
+                setShowLogin(false);
+
+                toast.success("Logged in with Google");
+              } else {
+                toast.error(data.message);
+              }
+            } catch (error) {
+              toast.error("Google login failed");
+            }
+          }}
+          onError={() => toast.error("Google Login Failed")}
+        />
+        </div>
       </motion.form>
     </div>
   );

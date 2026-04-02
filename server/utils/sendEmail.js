@@ -10,13 +10,17 @@ const transporter = nodemailer.createTransport({
 
 export const sendEmail = async (to, subject, html) => {
   try {
-    await transporter.sendMail({
+    console.log("📧 Attempting to send email to:", to)
+  
+    const info =await transporter.sendMail({
       from: `"Car Rental Platform" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html,
     });
+    console.log("✅ Email sent:", info.response);
+
   } catch (error) {
-    console.error("Email sending failed:", error.message);
+    console.error("Full Email Error:", error);
   }
 };

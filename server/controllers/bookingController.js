@@ -70,7 +70,6 @@ export const createBooking = async (req, res) => {
     });
 
     // Email to User
-    console.log("Sending email to user:", userData.email);
      await sendEmail(
       userData.email,
       "Booking Request Received 🚗",
@@ -84,7 +83,6 @@ export const createBooking = async (req, res) => {
     );
 
     // Email to Owner
-    console.log("Sending email to owner:", carData.owner.email);
      await sendEmail(
       carData.owner.email,
       "New Booking Request 🚨",
